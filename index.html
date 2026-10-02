@@ -7,7 +7,7 @@
 :root{--p:#4f46e5;--p2:#7c3aed;--bg:#f4f5fb;--c:#fff;--t:#1e1b2e;--m:#6b7280;--b:#e5e7eb}
 *{box-sizing:border-box;margin:0}html{scroll-behavior:smooth}body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--t);line-height:1.5}
 header{background:#fff;border-bottom:1px solid var(--b);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5;gap:8px;flex-wrap:wrap}
-.logo{display:flex;align-items:center;gap:10px;cursor:pointer}.lg{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
+.hi{font-size:14px;font-weight:600;color:var(--p);padding:8px 6px}.logo{display:flex;align-items:center;gap:10px;cursor:pointer}.lg{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
 .logo b{font-size:18px;line-height:1.1}.logo small{display:block;color:var(--m);font-size:11px;font-weight:500}
 nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:var(--t);padding:8px 12px;font-size:14px}nav button:hover{background:#eef2ff;color:var(--p)}nav .pr{background:var(--p);color:#fff}
 main{max-width:1000px;margin:0 auto;padding:16px}
@@ -35,28 +35,25 @@ footer{background:#1e1b2e;color:#c9c7d6;margin-top:36px;padding:28px 16px;text-a
 footer b{color:#fff;font-size:18px;display:block;margin-bottom:6px}footer a{color:#fff}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:9}
 h2{margin:8px 0 12px}
-.lg img{
-    width: 40px;
-    height: 40px;
-
-}
+.lg{overflow:hidden;background:#fff;border:1px solid var(--b)}.lg img{width:40px;height:40px;object-fit:cover;display:block}
 </style></head><body>
-<header><div class="logo" onclick="go('home')"><div class="lg"><img src="ROY LOGO.jpg"></div><b>Roy Infotech<small>Coaching &amp; Computer Institute</small></b></div><nav id="nav"></nav></header>
+<header><div class="logo" onclick="go('home')"><div class="lg"><img src="ROY LOGO.jpg" alt="Roy Infotech"></div><b>Roy Infotech<small>Coaching &amp; Computer Institute</small></b></div><nav id="nav"></nav></header>
 <main id="app">Loading...</main>
 <footer id="ft"></footer><div id="toast"></div>
 <script>
 // ====== SETTINGS ======
 const SUPABASE_URL="https://ebtusddbqeetiuxaionx.supabase.co";
 const SUPABASE_KEY="sb_publishable_nG23Z21K7OQg8MEweb6rrg__YlbRSJK";
-const UPI_ID="9060180354@ybl";   // <-- apni UPI ID yahan likho
+const UPI_ID="9060180354@ybl";
 const UPI_NAME="Roy Infotech";
-const PHONE="9060180354";   // <-- apna WhatsApp number (91 ke saath, bina + ke)
-const EMAIL="royinfotech@gmail.com";
+const PHONE="919060180354";   // WhatsApp number (91 ke saath)
+const EMAIL="royinfotech.patna@gmail.com";
 const ADDRESS="Patna, Bihar";
 // ======================
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=s=>document.querySelector(s);
 let me=null,prof=null,courses=[],enr=[],view="home",cur=null,lessons=[],lesson=null,authMode="login";
+const nm=()=>{let n=(prof?.name||me?.user_metadata?.name||(me?.email||"").split("@")[0]||"").trim().split(" ")[0];return n.charAt(0).toUpperCase()+n.slice(1)};
 const toast=m=>{const t=$("#toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",3000)};
 const yid=u=>{const m=String(u).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:(String(u).length==11?u:null)};
 const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
@@ -76,13 +73,13 @@ function go(v){view=v;render()}
 function render(){
  $("#ft").innerHTML=`<b>Roy Infotech</b>${ADDRESS}<br>📞 <a href="https://wa.me/${PHONE}">WhatsApp</a> · ✉️ ${EMAIL}<br><br>© ${new Date().getFullYear()} Roy Infotech. All rights reserved.`;
  const adm=prof?.role==="admin";
- $("#nav").innerHTML=(me?`<button onclick="go('home')">Home</button><button onclick="go('my')">My Learning</button>${adm?`<button onclick="go('admin')">Admin</button>`:""}<button onclick="out()">Logout</button>`:`<button class="pr" onclick="go('auth')">Login / Signup</button>`);
+ $("#nav").innerHTML=(me?`<span class="hi">👋 ${esc(nm())}</span><button onclick="go('home')">Home</button><button onclick="go('my')">My Learning</button>${adm?`<button onclick="go('admin')">Admin</button>`:""}<button onclick="out()">Logout</button>`:`<button class="pr" onclick="go('auth')">Login / Signup</button>`);
  const a=$("#app");
  if(view==="auth"&&!me)return a.innerHTML=authH();
  if(view==="my"&&me)return myH();
  if(view==="watch")return watchH();
  if(view==="admin"&&adm)return adminH();
- a.innerHTML=`<section class="hero"><h1>Apna Career Banao,<br>Roy Infotech ke Saath</h1><p>Expert teachers se online seekho. Mobile par kahin bhi, kabhi bhi. Course kharido aur turant padhna shuru karo.</p><a class="btn" href="#courses">Courses Dekho</a><a class="btn o" href="https://wa.me/${PHONE}" target="_blank">WhatsApp par Pucho</a></section>
+ a.innerHTML=`<section class="hero">${me?`<div style="font-size:18px;font-weight:600;margin-bottom:8px">Namaste, ${esc(nm())} 👋</div>`:""}<h1>Apna Career Banao,<br>Roy Infotech ke Saath</h1><p>Expert teachers se online seekho. Mobile par kahin bhi, kabhi bhi. Course kharido aur turant padhna shuru karo.</p><a class="btn" href="#courses">Courses Dekho</a><a class="btn o" href="https://wa.me/${PHONE}" target="_blank">WhatsApp par Pucho</a></section>
 <div class="feat"><div class="ft"><i>👨‍🏫</i><b>Expert Teaching</b><span>Aasan bhasha mein padhai</span></div><div class="ft"><i>📱</i><b>Mobile Friendly</b><span>Phone par app jaisa experience</span></div><div class="ft"><i>▶️</i><b>Video Lectures</b><span>Jab chaho tab dekho</span></div><div class="ft"><i>💳</i><b>Easy UPI Payment</b><span>Pay karo, turant approval</span></div></div>
 <h2 class="sec" id="courses">Hamare Courses</h2><div class="grid">${courses.map(c=>`<div class="card"><div class="th">${esc(c.title.charAt(0).toUpperCase())}</div><div class="cb"><h3>${esc(c.title)}</h3><p class="m">${esc(c.description)}</p><div class="price">${c.price?"₹"+c.price:"Free"}</div>${btn(c)}</div></div>`).join("")||"<div class='card pad'><b>Naye courses jald aa rahe hain 🚀</b><p class=m>Jaankari ke liye humse WhatsApp par sampark karo.</p></div>"}</div>`;
 }
@@ -98,7 +95,7 @@ async function auth(){
  else r=await sb.auth.signUp({email,password,options:{data:{name:$("#nm").value}}});
  if(r.error)return toast(r.error.message);
  if(!r.data.session)return toast("Email check karke confirm karo, phir login karo");
- view="home";load();
+ view="home";await load();toast("Welcome, "+nm()+" 👋");
 }
 async function out(){await sb.auth.signOut();view="home";load()}
 function buy(id){
