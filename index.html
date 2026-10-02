@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="hi"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#4f46e5"><title>Roy Infotech LMS</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<style>
+:root{--p:#4f46e5;--bg:#f5f6fa;--c:#fff;--t:#1e1b2e;--m:#6b7280;--b:#e5e7eb}
+*{box-sizing:border-box;margin:0}body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--t)}
+header{background:var(--p);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
+header b{font-size:18px}nav{display:flex;gap:6px;flex-wrap:wrap}
+main{max-width:900px;margin:0 auto;padding:16px}
+button,.btn{background:var(--p);color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
+button.g{background:#fff;color:var(--p);border:1px solid var(--p)}header button{background:#ffffff26;padding:8px 12px}
+.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.card h3{font-size:17px}.m{color:var(--m);font-size:14px}.price{font-size:20px;font-weight:700}
+input,textarea,select{width:100%;padding:11px;border:1px solid var(--b);border-radius:8px;font-size:16px;margin:4px 0;font-family:inherit}
+.box{max-width:380px;margin:30px auto}.v{position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin:12px 0}
+.v iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.les{padding:12px;border:1px solid var(--b);background:#fff;border-radius:8px;margin:6px 0;cursor:pointer}.les.on{border-color:var(--p);background:#eef2ff}
+.tag{font-size:12px;padding:3px 8px;border-radius:99px;background:#fef3c7}.tag.ok{background:#d1fae5}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:8px;display:none}
+h2{margin:8px 0 12px}
+</style></head><body>
+<header><b>🎓 Roy Infotech</b><nav id="nav"></nav></header>
+<main id="app">Loading...</main><div id="toast"></div>
+<script>
+// ====== SETTINGS ======
+const SUPABASE_URL="https://ebtusddbqeetiuxaionx.supabase.co";
+const SUPABASE_KEY="sb_publishable_nG23Z21K7OQg8MEweb6rrg__YlbRSJK";
+const UPI_ID="9060180354@ybl";   // <-- apni UPI ID yahan likho
+const UPI_NAME="Roy Infotech";
+// ======================
+const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const $=s=>document.querySelector(s);
+let me=null,prof=null,courses=[],enr=[],view="home",cur=null,lessons=[],lesson=null,authMode="login";
+const toast=m=>{const t=$("#toast");t.textContent=m;t.style.display="block";setTimeout(()=>t.style.display="none",3000)};
+const yid=u=>{const m=String(u).match(/(?:v=|youtu\.be\/|embed\/|shorts\/)([\w-]{11})/);return m?m[1]:(String(u).length==11?u:null)};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+async function load(){
+ const {data:{session}}=await sb.auth.getSession();me=session?.user||null;
+ if(me){
+  await sb.from("lms_profiles").insert({id:me.id,email:me.email,name:me.user_metadata?.name||""});
+  prof=(await sb.from("lms_profiles").select("*").eq("id",me.id).single()).data;
+  enr=(await sb.from("lms_enrollments").select("*").eq("user_id",me.id)).data||[];
+ }else{prof=null;enr=[]}
+ courses=(await sb.from("lms_courses").select("*").order("id",{ascending:false})).data||[];
+ render();
+}
+const st=cid=>enr.find(e=>e.course_id==cid)?.status;
+function go(v){view=v;render()}
+function render(){
+ const adm=prof?.role==="admin";
+ $("#nav").innerHTML=(me?`<button onclick="go('home')">Courses</button><button onclick="go('my')">My Learning</button>${adm?`<button onclick="go('admin')">Admin</button>`:""}<button onclick="out()">Logout</button>`:`<button onclick="go('auth')">Login</button>`);
+ const a=$("#app");
+ if(view==="auth"&&!me)return a.innerHTML=authH();
+ if(view==="my"&&me)return myH();
+ if(view==="watch")return watchH();
+ if(view==="admin"&&adm)return adminH();
+ a.innerHTML=`<h2>Hamare Courses</h2><div class="grid">${courses.map(c=>`<div class="card"><h3>${esc(c.title)}</h3><p class="m">${esc(c.description)}</p><div class="price">${c.price?"₹"+c.price:"Free"}</div>${btn(c)}</div>`).join("")||"<p class=m>Abhi koi course nahi hai.</p>"}</div>`;
+}
+function btn(c){const s=st(c.id);
+ if(s==="approved")return`<button onclick="open_(${c.id})">▶ Dekho</button>`;
+ if(s==="pending")return`<span class="tag">⏳ Payment verify ho rahi hai</span>`;
+ return`<button onclick="buy(${c.id})">Buy Now</button>`}
+function authH(){const L=authMode==="login";return`<div class="card box"><h2>${L?"Login":"Naya Account"}</h2>${L?"":`<input id="nm" placeholder="Aapka naam">`}<input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Password (min 6)"><button onclick="auth()">${L?"Login":"Signup"}</button><p class="m" style="text-align:center;cursor:pointer" onclick="authMode='${L?"signup":"login"}';render()">${L?"Naya account banao":"Pehle se account hai? Login"}</p></div>`}
+async function auth(){
+ const email=$("#em").value.trim(),password=$("#pw").value;
+ let r;
+ if(authMode==="login")r=await sb.auth.signInWithPassword({email,password});
+ else r=await sb.auth.signUp({email,password,options:{data:{name:$("#nm").value}}});
+ if(r.error)return toast(r.error.message);
+ if(!r.data.session)return toast("Email check karke confirm karo, phir login karo");
+ view="home";load();
+}
+async function out(){await sb.auth.signOut();view="home";load()}
+function buy(id){
+ if(!me){view="auth";return render()}
+ const c=courses.find(x=>x.id==id);
+ if(!c.price){return sb.from("lms_enrollments").insert({user_id:me.id,email:me.email,course_id:id,status:"pending"}).then(()=>{toast("Request bhej di");load()})}
+ const link=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${c.price}&cu=INR&tn=${encodeURIComponent(c.title)}`;
+ $("#app").innerHTML=`<div class="card box"><h2>${esc(c.title)}</h2><div class="price">₹${c.price}</div><p class="m">1. Neeche button se UPI app kholo aur pay karo<br>(ya UPI ID par bhejo: <b>${esc(UPI_ID)}</b>)<br>2. Payment ke baad UTR / Transaction ID yahan daalo</p><a class="btn" href="${link}" style="text-align:center;text-decoration:none">UPI se Pay karo</a><input id="utr" placeholder="UTR / Transaction ID"><button onclick="submitUtr(${id})">Maine pay kar diya</button><button class="g" onclick="go('home')">Wapas</button></div>`;
+}
+async function submitUtr(id){
+ const utr=$("#utr").value.trim();if(utr.length<6)return toast("Sahi UTR daalo");
+ const {error}=await sb.from("lms_enrollments").insert({user_id:me.id,email:me.email,course_id:id,utr,status:"pending"});
+ if(error)return toast(error.message);toast("Submit ho gaya! Approval ka wait karo");view="home";load();
+}
+function myH(){
+ const mine=courses.filter(c=>st(c.id));
+ $("#app").innerHTML=`<h2>My Learning</h2><div class="grid">${mine.map(c=>`<div class="card"><h3>${esc(c.title)}</h3>${btn(c)}</div>`).join("")||"<p class=m>Aapne abhi koi course nahi liya.</p>"}</div>`;
+}
+async function open_(id){
+ cur=courses.find(c=>c.id==id);
+ lessons=(await sb.from("lms_lessons").select("*").eq("course_id",id).order("position")).data||[];
+ lesson=lessons[0]||null;view="watch";render();
+}
+function watchH(){
+ $("#app").innerHTML=`<button class="g" onclick="go('my')">← Wapas</button><h2 style="margin-top:12px">${esc(cur.title)}</h2>${lesson?`<div class="v"><iframe src="https://www.youtube-nocookie.com/embed/${lesson.youtube_id}?rel=0&modestbranding=1" allow="accelerometer;encrypted-media;picture-in-picture" allowfullscreen></iframe></div><h3>${esc(lesson.title)}</h3>`:"<p class=m>Lectures jald aayenge.</p>"}<div style="margin-top:12px">${lessons.map(l=>`<div class="les ${l.id==lesson?.id?"on":""}" onclick="lesson=lessons.find(x=>x.id==${l.id});watchH()">▶ ${esc(l.title)}</div>`).join("")}</div>`;
+}
+let tab="pay";
+async function adminH(){
+ const pay=(await sb.from("lms_enrollments").select("*").order("id",{ascending:false})).data||[];
+ const cn=id=>courses.find(c=>c.id==id)?.title||id;
+ let h=`<div class="row"><h2>Admin Panel</h2><div><button class="${tab=="pay"?"":"g"}" onclick="tab='pay';adminH()">Payments</button> <button class="${tab=="crs"?"":"g"}" onclick="tab='crs';adminH()">Courses</button></div></div>`;
+ if(tab==="pay")h+=pay.map(p=>`<div class="card" style="margin:8px 0"><div class="row"><b>${esc(p.email)}</b><span class="tag ${p.status=="approved"?"ok":""}">${p.status}</span></div><div class="m">${esc(cn(p.course_id))} · UTR: ${esc(p.utr||"-")}</div>${p.status=="pending"?`<div class="row"><button onclick="setS(${p.id},'approved')">✅ Approve</button><button class="g" onclick="setS(${p.id},'rejected')">❌ Reject</button></div>`:""}</div>`).join("")||"<p class=m>Koi request nahi.</p>";
+ else h+=`<div class="card"><h3>Naya Course</h3><input id="ct" placeholder="Course ka naam"><textarea id="cd" placeholder="Description"></textarea><input id="cp" type="number" placeholder="Price ₹ (0 = free)"><button onclick="addC()">Course Add Karo</button></div>`+courses.map(c=>`<div class="card" style="margin:10px 0"><div class="row"><b>${esc(c.title)}</b><button class="g" onclick="delC(${c.id})">Delete</button></div><input id="lt${c.id}" placeholder="Lecture ka naam"><input id="ly${c.id}" placeholder="YouTube unlisted link"><button onclick="addL(${c.id})">+ Lecture Add</button></div>`).join("");
+ $("#app").innerHTML=h;
+}
+async function setS(id,s){await sb.from("lms_enrollments").update({status:s}).eq("id",id);adminH()}
+async function addC(){const {error}=await sb.from("lms_courses").insert({title:$("#ct").value,description:$("#cd").value,price:+$("#cp").value||0});if(error)return toast(error.message);toast("Course ban gaya");await load();view="admin";adminH()}
+async function delC(id){if(!confirm("Delete karna hai?"))return;await sb.from("lms_courses").delete().eq("id",id);await load();view="admin";adminH()}
+async function addL(cid){
+ const y=yid($("#ly"+cid).value),t=$("#lt"+cid).value;if(!y||!t)return toast("Naam aur sahi YouTube link daalo");
+ const n=((await sb.from("lms_lessons").select("id",{count:"exact"}).eq("course_id",cid)).count)||0;
+ const {error}=await sb.from("lms_lessons").insert({course_id:cid,title:t,youtube_id:y,position:n+1});
+ if(error)return toast(error.message);toast("Lecture add ho gaya");$("#lt"+cid).value=$("#ly"+cid).value="";
+}
+load();
+</script></body></html>
