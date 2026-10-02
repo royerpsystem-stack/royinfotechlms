@@ -4,33 +4,55 @@
 <meta name="theme-color" content="#4f46e5"><title>Roy Infotech LMS</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
 <style>
-:root{--p:#4f46e5;--bg:#f5f6fa;--c:#fff;--t:#1e1b2e;--m:#6b7280;--b:#e5e7eb}
-*{box-sizing:border-box;margin:0}body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--t)}
-header{background:var(--p);color:#fff;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5}
-header b{font-size:18px}nav{display:flex;gap:6px;flex-wrap:wrap}
-main{max-width:900px;margin:0 auto;padding:16px}
-button,.btn{background:var(--p);color:#fff;border:0;border-radius:8px;padding:10px 14px;font-size:15px;cursor:pointer}
-button.g{background:#fff;color:var(--p);border:1px solid var(--p)}header button{background:#ffffff26;padding:8px 12px}
-.grid{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
-.card{background:var(--c);border:1px solid var(--b);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:10px}
-.card h3{font-size:17px}.m{color:var(--m);font-size:14px}.price{font-size:20px;font-weight:700}
-input,textarea,select{width:100%;padding:11px;border:1px solid var(--b);border-radius:8px;font-size:16px;margin:4px 0;font-family:inherit}
-.box{max-width:380px;margin:30px auto}.v{position:relative;padding-top:56.25%;border-radius:12px;overflow:hidden;background:#000;margin:12px 0}
+:root{--p:#4f46e5;--p2:#7c3aed;--bg:#f4f5fb;--c:#fff;--t:#1e1b2e;--m:#6b7280;--b:#e5e7eb}
+*{box-sizing:border-box;margin:0}html{scroll-behavior:smooth}body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--t);line-height:1.5}
+header{background:#fff;border-bottom:1px solid var(--b);padding:10px 16px;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;z-index:5;gap:8px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;cursor:pointer}.lg{width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;display:grid;place-items:center;font-weight:800;font-size:18px}
+.logo b{font-size:18px;line-height:1.1}.logo small{display:block;color:var(--m);font-size:11px;font-weight:500}
+nav{display:flex;gap:6px;flex-wrap:wrap}nav button{background:transparent;color:var(--t);padding:8px 12px;font-size:14px}nav button:hover{background:#eef2ff;color:var(--p)}nav .pr{background:var(--p);color:#fff}
+main{max-width:1000px;margin:0 auto;padding:16px}
+button,.btn{background:var(--p);color:#fff;border:0;border-radius:10px;padding:11px 16px;font-size:15px;font-weight:600;cursor:pointer;display:inline-block;text-decoration:none}
+button.g{background:#fff;color:var(--p);border:1px solid var(--p)}
+.hero{background:linear-gradient(135deg,#4f46e5,#7c3aed 60%,#db2777);color:#fff;border-radius:20px;padding:44px 24px;text-align:center;margin-bottom:22px}
+.hero h1{font-size:clamp(26px,6vw,42px);line-height:1.2;margin-bottom:12px}.hero p{opacity:.92;max-width:560px;margin:0 auto 22px;font-size:clamp(15px,3.5vw,18px)}
+.hero .btn{background:#fff;color:var(--p);margin:4px}.hero .btn.o{background:transparent;color:#fff;border:2px solid #fff}
+.feat{display:grid;gap:12px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));margin-bottom:26px}
+.ft{background:#fff;border:1px solid var(--b);border-radius:14px;padding:16px;text-align:center}.ft i{font-style:normal;font-size:28px;display:block}.ft b{display:block;margin:4px 0 2px}.ft span{color:var(--m);font-size:13px}
+.sec{font-size:24px;margin:6px 0 14px}
+.grid{display:grid;gap:16px;grid-template-columns:repeat(auto-fill,minmax(270px,1fr))}
+.card{background:var(--c);border:1px solid var(--b);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 2px 8px #0000000a}
+.card.pad{padding:16px;gap:10px}.cb{padding:16px;display:flex;flex-direction:column;gap:8px;flex:1}
+.th{height:140px;display:grid;place-items:center;color:#fff;font-size:44px;font-weight:800;background:linear-gradient(135deg,var(--p),var(--p2))}
+.card h3{font-size:18px}.m{color:var(--m);font-size:14px}.price{font-size:22px;font-weight:800;color:var(--p)}
+.cb .btn,.cb button,.cb .tag{margin-top:auto}
+input,textarea{width:100%;padding:12px;border:1px solid var(--b);border-radius:10px;font-size:16px;margin:4px 0;font-family:inherit}
+.box{max-width:400px;margin:24px auto}.v{position:relative;padding-top:56.25%;border-radius:14px;overflow:hidden;background:#000;margin:12px 0}
 .v iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.les{padding:12px;border:1px solid var(--b);background:#fff;border-radius:8px;margin:6px 0;cursor:pointer}.les.on{border-color:var(--p);background:#eef2ff}
-.tag{font-size:12px;padding:3px 8px;border-radius:99px;background:#fef3c7}.tag.ok{background:#d1fae5}
+.les{padding:12px;border:1px solid var(--b);background:#fff;border-radius:10px;margin:6px 0;cursor:pointer}.les.on{border-color:var(--p);background:#eef2ff}
+.tag{font-size:13px;padding:6px 10px;border-radius:99px;background:#fef3c7;text-align:center}.tag.ok{background:#d1fae5}
 .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:8px;display:none}
+footer{background:#1e1b2e;color:#c9c7d6;margin-top:36px;padding:28px 16px;text-align:center;font-size:14px}
+footer b{color:#fff;font-size:18px;display:block;margin-bottom:6px}footer a{color:#fff}
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:9}
 h2{margin:8px 0 12px}
+.lg img{
+    width: 40px;
+    height: 40px;
+
+}
 </style></head><body>
-<header><b>🎓 Roy Infotech</b><nav id="nav"></nav></header>
-<main id="app">Loading...</main><div id="toast"></div>
+<header><div class="logo" onclick="go('home')"><div class="lg"><img src="ROY LOGO.jpg"></div><b>Roy Infotech<small>Coaching &amp; Computer Institute</small></b></div><nav id="nav"></nav></header>
+<main id="app">Loading...</main>
+<footer id="ft"></footer><div id="toast"></div>
 <script>
 // ====== SETTINGS ======
 const SUPABASE_URL="https://ebtusddbqeetiuxaionx.supabase.co";
 const SUPABASE_KEY="sb_publishable_nG23Z21K7OQg8MEweb6rrg__YlbRSJK";
 const UPI_ID="9060180354@ybl";   // <-- apni UPI ID yahan likho
 const UPI_NAME="Roy Infotech";
+const PHONE="9060180354";   // <-- apna WhatsApp number (91 ke saath, bina + ke)
+const EMAIL="royinfotech@gmail.com";
+const ADDRESS="Patna, Bihar";
 // ======================
 const sb=supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=s=>document.querySelector(s);
@@ -52,20 +74,23 @@ async function load(){
 const st=cid=>enr.find(e=>e.course_id==cid)?.status;
 function go(v){view=v;render()}
 function render(){
+ $("#ft").innerHTML=`<b>Roy Infotech</b>${ADDRESS}<br>📞 <a href="https://wa.me/${PHONE}">WhatsApp</a> · ✉️ ${EMAIL}<br><br>© ${new Date().getFullYear()} Roy Infotech. All rights reserved.`;
  const adm=prof?.role==="admin";
- $("#nav").innerHTML=(me?`<button onclick="go('home')">Courses</button><button onclick="go('my')">My Learning</button>${adm?`<button onclick="go('admin')">Admin</button>`:""}<button onclick="out()">Logout</button>`:`<button onclick="go('auth')">Login</button>`);
+ $("#nav").innerHTML=(me?`<button onclick="go('home')">Home</button><button onclick="go('my')">My Learning</button>${adm?`<button onclick="go('admin')">Admin</button>`:""}<button onclick="out()">Logout</button>`:`<button class="pr" onclick="go('auth')">Login / Signup</button>`);
  const a=$("#app");
  if(view==="auth"&&!me)return a.innerHTML=authH();
  if(view==="my"&&me)return myH();
  if(view==="watch")return watchH();
  if(view==="admin"&&adm)return adminH();
- a.innerHTML=`<h2>Hamare Courses</h2><div class="grid">${courses.map(c=>`<div class="card"><h3>${esc(c.title)}</h3><p class="m">${esc(c.description)}</p><div class="price">${c.price?"₹"+c.price:"Free"}</div>${btn(c)}</div>`).join("")||"<p class=m>Abhi koi course nahi hai.</p>"}</div>`;
+ a.innerHTML=`<section class="hero"><h1>Apna Career Banao,<br>Roy Infotech ke Saath</h1><p>Expert teachers se online seekho. Mobile par kahin bhi, kabhi bhi. Course kharido aur turant padhna shuru karo.</p><a class="btn" href="#courses">Courses Dekho</a><a class="btn o" href="https://wa.me/${PHONE}" target="_blank">WhatsApp par Pucho</a></section>
+<div class="feat"><div class="ft"><i>👨‍🏫</i><b>Expert Teaching</b><span>Aasan bhasha mein padhai</span></div><div class="ft"><i>📱</i><b>Mobile Friendly</b><span>Phone par app jaisa experience</span></div><div class="ft"><i>▶️</i><b>Video Lectures</b><span>Jab chaho tab dekho</span></div><div class="ft"><i>💳</i><b>Easy UPI Payment</b><span>Pay karo, turant approval</span></div></div>
+<h2 class="sec" id="courses">Hamare Courses</h2><div class="grid">${courses.map(c=>`<div class="card"><div class="th">${esc(c.title.charAt(0).toUpperCase())}</div><div class="cb"><h3>${esc(c.title)}</h3><p class="m">${esc(c.description)}</p><div class="price">${c.price?"₹"+c.price:"Free"}</div>${btn(c)}</div></div>`).join("")||"<div class='card pad'><b>Naye courses jald aa rahe hain 🚀</b><p class=m>Jaankari ke liye humse WhatsApp par sampark karo.</p></div>"}</div>`;
 }
 function btn(c){const s=st(c.id);
  if(s==="approved")return`<button onclick="open_(${c.id})">▶ Dekho</button>`;
  if(s==="pending")return`<span class="tag">⏳ Payment verify ho rahi hai</span>`;
  return`<button onclick="buy(${c.id})">Buy Now</button>`}
-function authH(){const L=authMode==="login";return`<div class="card box"><h2>${L?"Login":"Naya Account"}</h2>${L?"":`<input id="nm" placeholder="Aapka naam">`}<input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Password (min 6)"><button onclick="auth()">${L?"Login":"Signup"}</button><p class="m" style="text-align:center;cursor:pointer" onclick="authMode='${L?"signup":"login"}';render()">${L?"Naya account banao":"Pehle se account hai? Login"}</p></div>`}
+function authH(){const L=authMode==="login";return`<div class="card pad box"><h2>${L?"Login":"Naya Account"}</h2>${L?"":`<input id="nm" placeholder="Aapka naam">`}<input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Password (min 6)"><button onclick="auth()">${L?"Login":"Signup"}</button><p class="m" style="text-align:center;cursor:pointer" onclick="authMode='${L?"signup":"login"}';render()">${L?"Naya account banao":"Pehle se account hai? Login"}</p></div>`}
 async function auth(){
  const email=$("#em").value.trim(),password=$("#pw").value;
  let r;
@@ -81,7 +106,7 @@ function buy(id){
  const c=courses.find(x=>x.id==id);
  if(!c.price){return sb.from("lms_enrollments").insert({user_id:me.id,email:me.email,course_id:id,status:"pending"}).then(()=>{toast("Request bhej di");load()})}
  const link=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${c.price}&cu=INR&tn=${encodeURIComponent(c.title)}`;
- $("#app").innerHTML=`<div class="card box"><h2>${esc(c.title)}</h2><div class="price">₹${c.price}</div><p class="m">1. Neeche button se UPI app kholo aur pay karo<br>(ya UPI ID par bhejo: <b>${esc(UPI_ID)}</b>)<br>2. Payment ke baad UTR / Transaction ID yahan daalo</p><a class="btn" href="${link}" style="text-align:center;text-decoration:none">UPI se Pay karo</a><input id="utr" placeholder="UTR / Transaction ID"><button onclick="submitUtr(${id})">Maine pay kar diya</button><button class="g" onclick="go('home')">Wapas</button></div>`;
+ $("#app").innerHTML=`<div class="card pad box"><h2>${esc(c.title)}</h2><div class="price">₹${c.price}</div><p class="m">1. Neeche button se UPI app kholo aur pay karo<br>(ya UPI ID par bhejo: <b>${esc(UPI_ID)}</b>)<br>2. Payment ke baad UTR / Transaction ID yahan daalo</p><a class="btn" href="${link}" style="text-align:center;text-decoration:none">UPI se Pay karo</a><input id="utr" placeholder="UTR / Transaction ID"><button onclick="submitUtr(${id})">Maine pay kar diya</button><button class="g" onclick="go('home')">Wapas</button></div>`;
 }
 async function submitUtr(id){
  const utr=$("#utr").value.trim();if(utr.length<6)return toast("Sahi UTR daalo");
@@ -90,7 +115,7 @@ async function submitUtr(id){
 }
 function myH(){
  const mine=courses.filter(c=>st(c.id));
- $("#app").innerHTML=`<h2>My Learning</h2><div class="grid">${mine.map(c=>`<div class="card"><h3>${esc(c.title)}</h3>${btn(c)}</div>`).join("")||"<p class=m>Aapne abhi koi course nahi liya.</p>"}</div>`;
+ $("#app").innerHTML=`<h2>My Learning</h2><div class="grid">${mine.map(c=>`<div class="card"><div class="th">${esc(c.title.charAt(0).toUpperCase())}</div><div class="cb"><h3>${esc(c.title)}</h3>${btn(c)}</div></div>`).join("")||"<p class=m>Aapne abhi koi course nahi liya.</p>"}</div>`;
 }
 async function open_(id){
  cur=courses.find(c=>c.id==id);
