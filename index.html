@@ -36,6 +36,13 @@ footer{background:#1e1b2e;color:#c9c7d6;margin-top:36px;padding:28px 16px;text-a
 footer b{color:#fff;font-size:18px;display:block;margin-bottom:6px}footer a{color:#fff}
 #toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 16px;border-radius:8px;display:none;z-index:9}
 h2{margin:8px 0 12px}
+.ahead{background:linear-gradient(135deg,#1e1b2e,#4f46e5);color:#fff;border-radius:16px;padding:20px;margin-bottom:14px}.ahead h2{margin:0}.ahead span{opacity:.8;font-size:14px}
+.stats{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin-bottom:14px}.stat{background:#fff;border:1px solid var(--b);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:center}.stat i{font-style:normal;font-size:26px}.stat b{font-size:20px;display:block}.stat span{font-size:12px;color:var(--m)}
+.tabs{display:flex;gap:6px;background:#fff;border:1px solid var(--b);border-radius:12px;padding:5px;margin-bottom:14px;overflow-x:auto}.tb{background:transparent;color:var(--m);flex:1;white-space:nowrap}.tb.on{background:var(--p);color:#fff}
+.pills{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}.pl{background:#fff;color:var(--m);border:1px solid var(--b);padding:6px 12px;font-size:13px;border-radius:99px;text-transform:capitalize}.pl.on{background:#eef2ff;color:var(--p);border-color:var(--p)}
+.pay{background:#fff;border:1px solid var(--b);border-radius:14px;padding:14px;display:flex;gap:12px;margin-bottom:10px;flex-wrap:wrap;align-items:center}.av{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--p),var(--p2));color:#fff;display:grid;place-items:center;font-weight:700}
+.pi{flex:1;min-width:200px;display:flex;flex-direction:column;font-size:13px;color:var(--m)}.pi b{color:var(--t);font-size:15px}.pr2{display:flex;flex-direction:column;gap:6px;align-items:flex-end}.pr2>b{font-size:18px}code{background:var(--bg);padding:1px 6px;border-radius:5px;color:var(--t)}
+.qrs{width:60px;height:60px;object-fit:cover;border-radius:8px;border:1px solid var(--b)}
 .tag.no{background:#fee2e2}label{font-size:13px;font-weight:600;color:var(--m);display:block;margin-top:8px}.mini{padding:6px 10px;font-size:13px}.ls{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;background:var(--bg);border-radius:8px;margin:4px 0;font-size:14px}.adm-th{height:90px}
 .lg{overflow:hidden;background:#fff;border:1px solid var(--b)}.lg img{width:40px;height:40px;object-fit:cover;display:block}
 </style></head><body>
@@ -104,15 +111,16 @@ async function out(){await sb.auth.signOut();view="home";load()}
 function buy(id){
  if(!me){view="auth";return render()}
  const c=courses.find(x=>x.id==id);
- if(!c.price){return sb.from("lms_enrollments").insert({user_id:me.id,email:me.email,course_id:id,status:"pending"}).then(()=>{toast("Request bhej di");load()})}
+ if(!c.price){return sb.from("lms_enrollments").insert({user_id:me.id,email:me.email,course_id:id,status:"pending",amount:0}).then(()=>{toast("Request bhej di");load()})}
  const link=`upi://pay?pa=${UPI_ID}&pn=${encodeURIComponent(UPI_NAME)}&am=${c.price}&cu=INR&tn=${encodeURIComponent(c.title)}`;
- $("#app").innerHTML=`<div class="card pad box"><h2>${esc(c.title)}</h2><div class="price">₹${c.price}</div><p class="m">1. QR scan karke ₹${c.price} pay karo (UPI ID: <b>${esc(UPI_ID)}</b>)<br>2. Payment ke baad UTR / Transaction ID niche daalo</p><div id="qr" style="display:grid;place-items:center;margin:6px 0"></div><p class="m" style="text-align:center">QR scan karo, ya phone par neeche button dabao</p><a class="btn" href="${link}" style="text-align:center;text-decoration:none">UPI App se Pay karo</a><input id="utr" placeholder="UTR / Transaction ID"><button onclick="submitUtr(${id})">Maine pay kar diya</button><button class="g" onclick="go('home')">Wapas</button></div>`;
- new QRCode($("#qr"),{text:link,width:200,height:200});
+ $("#app").innerHTML=`<div class="card pad box"><h2>${esc(c.title)}</h2><div class="price">₹${c.price}</div><p class="m">1. Neeche QR scan karke <b>₹${c.price}</b> pay karo<br>2. Payment ke baad UTR / Transaction ID daalo<br>3. Admin verify karega, phir course khul jayega</p><div style="display:grid;place-items:center;margin:6px 0">${c.qr?`<img src="${c.qr}" alt="QR" style="width:230px;max-width:100%;border-radius:12px;border:1px solid var(--b)">`:`<div id="qr"></div>`}</div><input id="utr" placeholder="UTR / Transaction ID"><button onclick="submitUtr(${id})">Maine pay kar diya</button><button class="g" onclick="go('home')">Wapas</button></div>`;
+ if(!c.qr)new QRCode($("#qr"),{text:link,width:200,height:200});
 }
 async function submitUtr(id){
- const utr=$("#utr").value.trim();if(utr.length<6)return toast("Sahi UTR daalo");
- const {error}=await sb.from("lms_enrollments").insert({user_id:me.id,email:me.email,course_id:id,utr,status:"pending"});
- if(error)return toast(error.message);toast("Submit ho gaya! Approval ka wait karo");view="home";load();
+ const utr=$("#utr").value.trim();if(utr.length<8)return toast("Sahi UTR daalo");
+ const c=courses.find(x=>x.id==id);
+ const {error}=await sb.from("lms_enrollments").insert({user_id:me.id,email:me.email,course_id:id,utr,status:"pending",amount:c.price});
+ if(error)return toast(error.message);toast("Submit ho gaya! Admin approve karega to course khul jayega");view="home";load();
 }
 function myH(){
  const mine=courses.filter(c=>st(c.id));
@@ -126,20 +134,35 @@ async function open_(id){
 function watchH(){
  $("#app").innerHTML=`<button class="g" onclick="go('my')">← Wapas</button><h2 style="margin-top:12px">${esc(cur.title)}</h2>${lesson?`<div class="v"><iframe src="https://www.youtube-nocookie.com/embed/${lesson.youtube_id}?rel=0&modestbranding=1" allow="accelerometer;encrypted-media;picture-in-picture" allowfullscreen></iframe></div><h3>${esc(lesson.title)}</h3>`:"<p class=m>Lectures jald aayenge.</p>"}<div style="margin-top:12px">${lessons.map(l=>`<div class="les ${l.id==lesson?.id?"on":""}" onclick="lesson=lessons.find(x=>x.id==${l.id});watchH()">▶ ${esc(l.title)}</div>`).join("")}</div>`;
 }
-let tab="pay";
+let tab="pay",editId=null,flt="all";
+const img=(f,w)=>new Promise(r=>{if(!f)return r(null);const fr=new FileReader();fr.onload=()=>{const i=new Image();i.onload=()=>{const k=Math.min(1,w/i.width),c=document.createElement("canvas");c.width=i.width*k;c.height=i.height*k;const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);x.drawImage(i,0,0,c.width,c.height);r(c.toDataURL("image/jpeg",.88))};i.src=fr.result};fr.readAsDataURL(f)});
 async function adminH(){
- const [pr,lr]=await Promise.all([sb.from("lms_enrollments").select("*").order("id",{ascending:false}),sb.from("lms_lessons").select("*").order("position")]);
- const P=pr.data||[],L=lr.data||[],cn=id=>courses.find(c=>c.id==id)?.title||id,pend=P.filter(p=>p.status=="pending").length;
- const T=(k,l)=>`<button class="${tab==k?"":"g"}" onclick="tab='${k}';adminH()">${l}</button>`;
- let h=`<h2>⚙️ Admin Panel</h2><div class="row" style="justify-content:flex-start;margin-bottom:14px">${T("pay","💰 Payments"+(pend?" ("+pend+")":""))}${T("crs","📚 Mere Courses")}${T("new","➕ Naya Course")}</div>`;
- if(tab=="pay")h+=P.map(p=>`<div class="card pad" style="margin:8px 0"><div class="row"><b>${esc(p.email)}</b><span class="tag ${p.status=="approved"?"ok":p.status=="rejected"?"no":""}">${p.status}</span></div><div class="m">📚 ${esc(cn(p.course_id))}<br>🔢 UTR: ${esc(p.utr||"-")}<br>🕒 ${new Date(p.created_at).toLocaleString("en-IN")}</div>${p.status=="pending"?`<div class="row"><button onclick="setS(${p.id},'approved')">✅ Approve</button><button class="g" onclick="setS(${p.id},'rejected')">❌ Reject</button></div>`:""}</div>`).join("")||"<p class=m>Abhi koi payment request nahi hai.</p>";
- if(tab=="crs")h+=courses.map(c=>{const ls=L.filter(l=>l.course_id==c.id);return`<div class="card" style="margin:12px 0">${c.thumb?`<img class="th adm-th" src="${esc(c.thumb)}" style="width:100%;object-fit:cover">`:""}<div class="cb"><div class="row"><div><h3>${esc(c.title)}</h3><span class="m">${c.price?"₹"+c.price:"Free"} · ${ls.length} lectures</span></div><button class="g mini" onclick="delC(${c.id})">🗑 Course Delete</button></div>${ls.map((l,i)=>`<div class="ls"><span>${i+1}. ${esc(l.title)}</span><button class="g mini" onclick="delL(${l.id})">✕</button></div>`).join("")||"<p class=m>Abhi koi lecture nahi hai.</p>"}<label>Naya Lecture</label><input id="lt${c.id}" placeholder="Lecture ka naam"><input id="ly${c.id}" placeholder="YouTube unlisted video ka link"><button onclick="addL(${c.id})">+ Lecture Add Karo</button></div></div>`}).join("")||"<p class=m>Pehle 'Naya Course' tab se course banao.</p>";
- if(tab=="new")h+=`<div class="card pad"><label>Course ka naam</label><input id="ct" placeholder="Jaise: Basic Computer Course"><label>Description</label><textarea id="cd" rows="3" placeholder="Course mein kya sikhaya jayega"></textarea><label>Price (₹) — free ke liye 0</label><input id="cp" type="number" placeholder="999"><label>Banner image ka link (optional)</label><input id="cth" placeholder="https://.../banner.jpg"><button onclick="addC()">✅ Course Banao</button></div>`;
+ const [pr,lr,fr]=await Promise.all([sb.from("lms_enrollments").select("*").order("id",{ascending:false}),sb.from("lms_lessons").select("*").order("position"),sb.from("lms_profiles").select("id,name")]);
+ const P=pr.data||[],L=lr.data||[],N={};(fr.data||[]).forEach(x=>N[x.id]=x.name);
+ const cn=id=>courses.find(c=>c.id==id)?.title||id,ok=P.filter(p=>p.status=="approved"),pend=P.filter(p=>p.status=="pending").length,rev=ok.reduce((a,p)=>a+(p.amount||0),0);
+ const S=(i,l,v)=>`<div class="stat"><i>${i}</i><div><b>${v}</b><span>${l}</span></div></div>`;
+ const T=(k,l)=>`<button class="tb ${tab==k?"on":""}" onclick="tab='${k}';if(k!='new')editId=null;adminH()">${l}</button>`;
+ let h=`<div class="ahead"><h2>Admin Dashboard</h2><span>Roy Infotech LMS</span></div><div class="stats">${S("💰","Total Kamai","₹"+rev)}${S("⏳","Pending",pend)}${S("✅","Approved",ok.length)}${S("📚","Courses",courses.length)}</div><div class="tabs">${T("pay","💳 Payments"+(pend?" ("+pend+")":""))}${T("crs","📚 Courses")}${T("new",editId?"✏️ Edit":"➕ Naya Course")}</div>`;
+ if(tab=="pay"){
+  const F=P.filter(p=>flt=="all"||p.status==flt);
+  h+=`<div class="pills">${["all","pending","approved","rejected"].map(f=>`<button class="pl ${flt==f?"on":""}" onclick="flt='${f}';adminH()">${f}</button>`).join("")}</div>`+(F.map(p=>{const nm_=N[p.user_id]||p.email;return`<div class="pay"><div class="av">${esc(nm_[0].toUpperCase())}</div><div class="pi"><b>${esc(nm_)}</b><span>${esc(p.email)}</span><span>📚 ${esc(cn(p.course_id))}</span><span>UTR: <code>${esc(p.utr||"-")}</code> · 🕒 ${new Date(p.created_at).toLocaleString("en-IN")}</span></div><div class="pr2"><b>₹${p.amount??0}</b><span class="tag ${p.status=="approved"?"ok":p.status=="rejected"?"no":""}">${p.status}</span>${p.status=="pending"?`<div class="row"><button class="mini" onclick="setS(${p.id},'approved')">✅ Approve</button><button class="g mini" onclick="setS(${p.id},'rejected')">❌</button></div>`:""}</div></div>`}).join("")||"<p class=m>Is filter mein koi payment nahi hai.</p>");
+ }
+ if(tab=="crs")h+=courses.map(c=>{const ls=L.filter(l=>l.course_id==c.id);return`<div class="card" style="margin:12px 0">${c.thumb?`<img class="th adm-th" src="${c.thumb}" style="width:100%;object-fit:cover">`:""}<div class="cb"><div class="row"><div><h3>${esc(c.title)}</h3><span class="m">${c.price?"₹"+c.price:"Free"} · ${ls.length} lectures · QR ${c.qr?"✅":"❌ nahi lagaya"}</span></div><div><button class="g mini" onclick="editC(${c.id})">✏️ Edit</button> <button class="g mini" onclick="delC(${c.id})">🗑</button></div></div>${ls.map((l,i)=>`<div class="ls"><span>${i+1}. ${esc(l.title)}</span><button class="g mini" onclick="delL(${l.id})">✕</button></div>`).join("")||"<p class=m>Abhi koi lecture nahi hai.</p>"}<label>Naya Lecture</label><input id="lt${c.id}" placeholder="Lecture ka naam"><input id="ly${c.id}" placeholder="YouTube unlisted video ka link"><button onclick="addL(${c.id})">+ Lecture Add Karo</button></div></div>`}).join("")||"<p class=m>Pehle 'Naya Course' tab se course banao.</p>";
+ if(tab=="new"){const e=courses.find(c=>c.id==editId)||{};h+=`<div class="card pad"><h3>${editId?"Course Edit Karo":"Naya Course"}</h3><label>Course ka naam</label><input id="ct" value="${esc(e.title)}" placeholder="Jaise: Basic Computer Course"><label>Description</label><textarea id="cd" rows="3" placeholder="Course mein kya sikhaya jayega">${esc(e.description)}</textarea><label>Price (₹), free ke liye 0</label><input id="cp" type="number" value="${e.price??""}" placeholder="999"><label>Course Banner (image)</label><input id="cth" type="file" accept="image/*"><label>Payment QR Code (aapka UPI QR ka screenshot)</label>${e.qr?`<img class="qrs" src="${e.qr}">`:""}<input id="cq" type="file" accept="image/*">${editId?'<p class="m">Naya image chuno tabhi badlega, warna purana rahega.</p>':""}<button onclick="saveC()">✅ Save Karo</button></div>`}
  $("#app").innerHTML=h;
+}
+function editC(id){editId=id;tab="new";adminH()}
+async function saveC(){
+ const t=$("#ct").value.trim();if(!t)return toast("Course ka naam daalo");
+ const o={title:t,description:$("#cd").value,price:+$("#cp").value||0};
+ const a=await img($("#cth").files[0],800),q=await img($("#cq").files[0],500);
+ if(a)o.thumb=a;if(q)o.qr=q;
+ const {error}=editId?await sb.from("lms_courses").update(o).eq("id",editId):await sb.from("lms_courses").insert(o);
+ if(error)return toast(error.message);
+ toast("Save ho gaya");editId=null;await load();view="admin";tab="crs";adminH();
 }
 async function delL(id){if(!confirm("Lecture delete karna hai?"))return;await sb.from("lms_lessons").delete().eq("id",id);adminH()}
 async function setS(id,s){await sb.from("lms_enrollments").update({status:s}).eq("id",id);adminH()}
-async function addC(){const {error}=await sb.from("lms_courses").insert({title:$("#ct").value,description:$("#cd").value,price:+$("#cp").value||0,thumb:$("#cth").value.trim()||null});if(error)return toast(error.message);toast("Course ban gaya! Ab lecture add karo");await load();view="admin";tab="crs";adminH()}
 async function delC(id){if(!confirm("Delete karna hai?"))return;await sb.from("lms_courses").delete().eq("id",id);await load();view="admin";adminH()}
 async function addL(cid){
  const y=yid($("#ly"+cid).value),t=$("#lt"+cid).value;if(!y||!t)return toast("Naam aur sahi YouTube link daalo");
